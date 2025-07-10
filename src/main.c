@@ -1,13 +1,12 @@
 #include "driver/i2s.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "freertos/queue.h"
-
-//setting the pins
-#define I2S_SCLK GPIO_NUM_14
-#define I2S_WS GPIO_NUM_25
-#define I2S_SD GPIO_NUM_32
-#define I2S_PORT I2S_NUM_0
+#include "Audio_task.h"
+#include "LED_task.h"
 
 void app_main() {
+    //setup for the i2s
     static const i2s_config_t i2s_config = {
         .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX), //for microphone, we want our microcontroller to recieve
         .sample_rate = 44100,
@@ -31,4 +30,10 @@ void app_main() {
     i2s_driver_install(I2S_PORT, &i2s_config, 0, NULL);
     i2s_set_pin(I2S_PORT, &i2s_pin_config);
 
+    i2s_set_sample_rates(I2S_PORT, 22050); //50% of the i2c config file
+
+    //RTOS TASKS:
+        //FFT - HIGHEST priority
+        //Driving LEDs - 2nd highest
+        //ADC/Microphone Sampling - 3rd
 }
