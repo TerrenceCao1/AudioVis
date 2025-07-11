@@ -15,4 +15,13 @@
         FFT_Audio_Sample
 */
 
+/*
+    function: I2S_Init -> initialize i2s_config and i2s_pin_config and install i2s driver
+    input: void
+    output: void
+*/
+void I2S_Init(void);
+
+
+
 #endif //AUDIO_TASK_h_
