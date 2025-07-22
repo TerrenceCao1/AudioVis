@@ -20,7 +20,7 @@
     input: void
     output: void
 */
-void I2S_Init(void);
+void I2S_Init(mainConfig, pinConfig);
 
 
 
