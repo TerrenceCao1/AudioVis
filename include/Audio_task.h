@@ -1,4 +1,7 @@
 //headers for audio - taking samples from INMP and performing FFT
+#include "driver/i2s.h"
+#include "freertos/queue.h"
+
 #ifndef AUDIO_TASK_h_
 #define AUDIO_TASK_h_
 
@@ -20,7 +23,7 @@
     input: void
     output: void
 */
-void I2S_Init(mainConfig, pinConfig);
+void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig);
 
 
 

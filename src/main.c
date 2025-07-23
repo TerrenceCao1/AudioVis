@@ -8,9 +8,10 @@
 void app_main() {
     //setup for the i2s
 
-    static const i2s_config_t i2s_config;
-    static const i2s_pin_config_t i2s_pin_config;
-    I2S_Init(i2s_config, i2s_pin_config);
+    static i2s_config_t i2s_config;
+    static i2s_pin_config_t i2s_pin_config;
+    I2S_Init(&i2s_config, &i2s_pin_config);
+    
     
     //RTOS TASKS:
         //FFT - HIGHEST priority
