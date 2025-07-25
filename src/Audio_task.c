@@ -26,6 +26,4 @@ void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig)
 
     i2s_driver_install(I2S_PORT, mainConfig, 0, NULL);
     i2s_set_pin(I2S_PORT, pinConfig);
-
-    i2s_set_sample_rates(I2S_PORT, 22050); //50% of the i2c config file
 }
