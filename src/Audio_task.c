@@ -27,3 +27,18 @@ void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig)
     i2s_driver_install(I2S_PORT, mainConfig, 0, NULL);
     i2s_set_pin(I2S_PORT, pinConfig);
 }
+
+void sampleAudioData(void * pvParameter)
+{
+    while (1)
+    {
+        int32_t *buffer =  (int32_t *) pvParameter;
+        size_t bytes_read;
+        i2s_read(I2S_NUM_0, buffer, sizeof(uint32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+
+        for (int i = 0; i < BUFFER_SIZE; i++)
+        {
+            printf("%li, ", buffer[i]);   
+        }
+    }
+}

@@ -6,7 +6,6 @@
 #include "LED_task.h"
 #include "esp_log.h"
 
-#define BUFFER_SIZE 32 //this is the FFT length 
 
 /*
     INMP441 PINOUT/WIRING:
@@ -25,17 +24,9 @@ void app_main() {
     static i2s_pin_config_t i2s_pin_config;
     I2S_Init(&i2s_config, &i2s_pin_config);
     
-    uint32_t buffer[BUFFER_SIZE];
-    while(1)
-    {
-        size_t bytes_read = 0;
-        i2s_read(I2S_NUM_0, buffer, sizeof(uint32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+    int32_t buffer[BUFFER_SIZE];
 
-        for (int i = 0; i < BUFFER_SIZE; i++)
-        {
-            printf("%li, ", buffer[i]);
-        }
-    }
+    xTaskCreate(sampleAudioData, "SamplingI2S", 8192, (void *) buffer, configMAX_PRIORITIES - 1, NULL);
     
     //RTOS TASKS:
         //ADC/Microphone Sampling - Highest

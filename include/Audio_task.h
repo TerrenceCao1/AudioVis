@@ -10,6 +10,7 @@
 #define I2S_WS GPIO_NUM_25
 #define I2S_SD GPIO_NUM_33
 #define I2S_PORT I2S_NUM_0
+#define BUFFER_SIZE 512
 
 /*
     functions needed:
@@ -25,6 +26,6 @@
 */
 void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig);
 
-
+void sampleAudioData(void *pvParameter);
 
 #endif //AUDIO_TASK_h_
