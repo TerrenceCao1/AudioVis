@@ -26,7 +26,7 @@ void app_main() {
     
     int32_t buffer[BUFFER_SIZE];
 
-    xTaskCreate(sampleAudioData, "SamplingI2S", 8192, (void *) buffer, configMAX_PRIORITIES - 1, NULL);
+    xTaskCreate(sampleAudioData, "SamplingI2S", 2048, (void *) buffer, configMAX_PRIORITIES - 1, NULL);
     
     //RTOS TASKS:
         //ADC/Microphone Sampling - Highest
