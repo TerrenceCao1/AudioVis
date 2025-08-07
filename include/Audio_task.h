@@ -1,6 +1,8 @@
 //headers for audio - taking samples from INMP and performing FFT
 #include "driver/i2s.h"
 #include "freertos/queue.h"
+#include <math.h>
+#include <fft.h>
 
 #ifndef AUDIO_TASK_h_
 #define AUDIO_TASK_h_
@@ -26,6 +28,19 @@
 */
 void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig);
 
+/*
+    function: sampleAudioData -> samples I2S audio data from IMNP441 microphone
+    input: buffer array to be filled with data
+    output: buffer gets filled with audio data
+*/
 void sampleAudioData(void *pvParameter);
+
+
+/*
+    function: fastFourierTransform -> takes buffer array and performs a fast fourier transform
+    input: pointer to buffer containing audio data
+    output: void
+*/
+void xFFT(void *pvParameter);
 
 #endif //AUDIO_TASK_h_

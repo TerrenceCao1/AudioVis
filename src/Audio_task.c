@@ -30,10 +30,11 @@ void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig)
 
 void sampleAudioData(void * pvParameter)
 {
+    
+    int32_t *buffer = (int32_t *) pvParameter;
+    size_t bytes_read;
     while (1)
     {
-        int32_t *buffer =  (int32_t *) pvParameter;
-        size_t bytes_read;
         i2s_read(I2S_NUM_0, buffer, sizeof(uint32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
 
         for (int i = 0; i < BUFFER_SIZE; i++)
@@ -42,3 +43,20 @@ void sampleAudioData(void * pvParameter)
         }
     }
 }
+/*
+void xFFT(void * pvParameter)
+{
+    int32_t *buffer = (int32_t *) pvParameter;
+    fft_config_t *fft_config = fft_init(512, FFT_REAL, FFT_FORWARD, buffer, NULL);
+    while (1)
+    {
+        fft_execute(fft_config);
+        printf("DC Component: %f\n", fft_config -> output);
+        for (int k = 1; k < fft_config -> size / 2; k++)
+        {
+            printf("%d-th frequency: %f+j%f\b", k, fft_config -> output[2*k], fft_config -> output[2*k + 1]);
+        }
+        printf("Middle Component: %f\n", fft_config -> output[1]);
+    }
+}
+*/
