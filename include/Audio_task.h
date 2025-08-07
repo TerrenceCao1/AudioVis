@@ -14,6 +14,7 @@
 #define I2S_PORT I2S_NUM_0
 #define BUFFER_SIZE 512
 
+
 /*
     functions needed:
         I2S_Init

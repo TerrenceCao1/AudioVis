@@ -2,6 +2,9 @@
 #include "driver/i2s.h"
 #include "freertos/queue.h"
 
+//initing queue for buffer pointer
+QueueHandle_t xBufferQueue = NULL;
+
 void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig)
 {
     *mainConfig = (i2s_config_t){
@@ -30,33 +33,54 @@ void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig)
 
 void sampleAudioData(void * pvParameter)
 {
-    
+    //buffer initialization
     int32_t *buffer = (int32_t *) pvParameter;
     size_t bytes_read;
+
+    //creating freeRTOS queue -> send a pointer to the array
+    xBufferQueue = xQueueCreate(5, sizeof(uint32_t*));
+    if(xBufferQueue == NULL)
+    {
+        printf("Queue Creation Error what the heck");
+    }
+
     while (1)
     {
+        //populate buffer
         i2s_read(I2S_NUM_0, buffer, sizeof(uint32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
 
-        for (int i = 0; i < BUFFER_SIZE; i++)
-        {
-            printf("%li, ", buffer[i]);   
-        }
+        //put pointer to buffer in the queue
+        xQueueSend(xBufferQueue, &buffer, 10);
     }
 }
-/*
-void xFFT(void * pvParameter)
+
+void xFFT(void* pvParameters)
 {
-    int32_t *buffer = (int32_t *) pvParameter;
-    fft_config_t *fft_config = fft_init(512, FFT_REAL, FFT_FORWARD, buffer, NULL);
+
+    fft_config_t *fft_config = fft_init(512, FFT_REAL, FFT_FORWARD, NULL, NULL);
+    
     while (1)
     {
         fft_execute(fft_config);
-        printf("DC Component: %f\n", fft_config -> output);
-        for (int k = 1; k < fft_config -> size / 2; k++)
+
+        //recieve the pointer to buffer from queue:
+        int32_t* RxedPointers[5];
+        if (xQueueReceive(xBufferQueue, &(RxedPointers), 10) == pdPASS)
         {
-            printf("%d-th frequency: %f+j%f\b", k, fft_config -> output[2*k], fft_config -> output[2*k + 1]);
+            
+            for (int i = 0; i < BUFFER_SIZE; i++)
+            {
+                fft_config->input[i] = *(RxedPointers[0] + i);
+            }
+
+            printf("DC Component: %f\n", fft_config -> output[0]);
+            for (int k = 1; k < fft_config -> size / 2; k++)
+            {
+                printf("%d-th frequency: %f+j%f\n", k, fft_config -> output[2*k], fft_config -> output[2*k + 1]);
+            }
+            printf("Middle Component: %f\n", fft_config -> output[1]);
         }
-        printf("Middle Component: %f\n", fft_config -> output[1]);
+
+        fft_destroy(fft_config);
     }
 }
-*/
