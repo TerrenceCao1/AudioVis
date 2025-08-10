@@ -51,6 +51,7 @@ void sampleAudioData(void * pvParameter)
 
         //put pointer to buffer in the queue
         xQueueSend(xBufferQueue, &buffer, 10);
+        printf("pointer sent YUH *****\n");
     }
 }
 

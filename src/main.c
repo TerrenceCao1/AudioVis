@@ -15,6 +15,9 @@
     SCK: GPIO 32
     WS: GPIO 25
     L/R: GND
+
+    LED ARRAY WIRING:
+    
 */
 
 void app_main() {
