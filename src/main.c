@@ -22,19 +22,11 @@
 
 void app_main() {
     //setup for the i2s
-
     static i2s_config_t i2s_config;
     static i2s_pin_config_t i2s_pin_config;
     I2S_Init(&i2s_config, &i2s_pin_config);
-    
-    int32_t buffer[BUFFER_SIZE];
+    xBufferReadySem = xSemaphoreCreateBinary();
 
-    xTaskCreate(sampleAudioData, "SamplingI2S", 2048, (void *) buffer, configMAX_PRIORITIES - 1, NULL);
-
-    xTaskCreate(xFFT, "fft", 8192, NULL, configMAX_PRIORITIES - 2, NULL);
-    
-    //RTOS TASKS:
-        //ADC/Microphone Sampling - Highest
-        //FFT - 2nd Priority
-        //Driving LEDs - 3rd
+    xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(xFFT, "fft", 8192, NULL, 4, NULL, 1);
 }
