@@ -1,9 +1,7 @@
 #include "Audio_task.h"
 #include "driver/i2s.h"
+#include "string.h"
 #include "freertos/queue.h"
-
-//initing queue for buffer pointer
-QueueHandle_t xBufferQueue = NULL;
 
 void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig)
 {
@@ -31,57 +29,60 @@ void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig)
     i2s_set_pin(I2S_PORT, pinConfig);
 }
 
+//initing Semaphores
+SemaphoreHandle_t xBufferReadySem; //semaphore for when buffer is ready
+
+//buffer initialization
+float bufferA[BUFFER_SIZE];
+float bufferB[BUFFER_SIZE];
+
+float *samplingBuffer = bufferA;
+float *fftBuffer = bufferB;
+
 void sampleAudioData(void * pvParameter)
 {
-    //buffer initialization
-    int32_t *buffer = (int32_t *) pvParameter;
     size_t bytes_read;
-
-    //creating freeRTOS queue -> send a pointer to the array
-    xBufferQueue = xQueueCreate(5, sizeof(uint32_t*));
-    if(xBufferQueue == NULL)
-    {
-        printf("Queue Creation Error what the heck");
-    }
 
     while (1)
     {
-        //populate buffer
-        i2s_read(I2S_NUM_0, buffer, sizeof(uint32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+        printf("started sampling \n");
 
-        //put pointer to buffer in the queue
-        xQueueSend(xBufferQueue, &buffer, 10);
-        printf("pointer sent YUH *****\n");
+        //error check + populate buffer:
+        esp_err_t ret = i2s_read(I2S_NUM_0, samplingBuffer, sizeof(uint32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+
+        if (ret != ESP_OK || bytes_read != sizeof(float) * BUFFER_SIZE)
+        {
+            printf("I2S read Error: %d, bytes: %d\n", ret, bytes_read);
+            vTaskDelay(pdMS_TO_TICKS(10));
+            continue;
+        }
+
+        //copy the sampling buffer over to the fftBuffer through temp
+        float *temp = fftBuffer;
+        fftBuffer = samplingBuffer;
+        samplingBuffer = temp;
+
+        //let FFT function know that the buffer is ready
+        xSemaphoreGive(xBufferReadySem);
+        printf("END OF SAMPLING \n");
     }
 }
 
 void xFFT(void* pvParameters)
 {
-
+    //init fft_config
     fft_config_t *fft_config = fft_init(512, FFT_REAL, FFT_FORWARD, NULL, NULL);
     
     while (1)
     {
-        fft_execute(fft_config);
-
-        //recieve the pointer to buffer from queue:
-        int32_t* RxedPointers[5];
-        if (xQueueReceive(xBufferQueue, &(RxedPointers), 10) == pdPASS)
+        if(xSemaphoreTake(xBufferReadySem, portMAX_DELAY))
         {
-            
-            for (int i = 0; i < BUFFER_SIZE; i++)
-            {
-                fft_config->input[i] = *(RxedPointers[0] + i);
-            }
-
-            printf("DC Component: %f\n", fft_config -> output[0]);
-            for (int k = 1; k < fft_config -> size / 2; k++)
-            {
-                printf("%d-th frequency: %f+j%f\n", k, fft_config -> output[2*k], fft_config -> output[2*k + 1]);
-            }
-            printf("Middle Component: %f\n", fft_config -> output[1]);
+            printf("start of FFT\n");
+            memcpy(fft_config->input, fftBuffer, sizeof(float) * BUFFER_SIZE);
+            fft_execute(fft_config);
+            printf("end of FFT\n");
         }
-
-        fft_destroy(fft_config);
+        taskYIELD();        
     }
+    fft_destroy(fft_config);
 }
