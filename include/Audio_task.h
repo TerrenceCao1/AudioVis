@@ -14,6 +14,11 @@
 #define I2S_PORT I2S_NUM_0
 #define BUFFER_SIZE 512
 
+extern SemaphoreHandle_t xBufferReadySem;
+extern float bufferA[BUFFER_SIZE];
+extern float bufferB[BUFFER_SIZE];
+extern float *samplingBuffer;
+extern float *fftBuffer;
 
 /*
     functions needed:
@@ -35,7 +40,6 @@ void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig);
     output: buffer gets filled with audio data
 */
 void sampleAudioData(void *pvParameter);
-
 
 /*
     function: fastFourierTransform -> takes buffer array and performs a fast fourier transform
