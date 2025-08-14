@@ -9,26 +9,30 @@
 
 
 //pin definitions:
+#define R0_PIN GPIO_NUM_4
+#define G0_PIN GPIO_NUM_5
+#define B0_PIN GPIO_NUM_14
 #define R1_PIN GPIO_NUM_12
 #define G1_PIN GPIO_NUM_13
-#define B1_PIN GPIO_NUM_14
-#define R2_PIN GPIO_NUM_15
-#define G2_PIN GPIO_NUM_16
-#define B2_PIN GPIO_NUM_17
-#define CLK_PIN GPIO_NUM_18
-#define LAT_PIN GPIO_NUM_19
-#define OE_PIN GPIO_NUM_21
-#define A_PIN GPIO_NUM_22
-#define B_PIN GPIO_NUM_23
-#define C_PIN GPIO_NUM_25
-#define D_PIN GPIO_NUM_26
+#define B1_PIN GPIO_NUM_16
+#define CLK_PIN GPIO_NUM_22
+#define LAT_PIN GPIO_NUM_23
+#define OE_PIN GPIO_NUM_27
+#define A_PIN GPIO_NUM_17
+#define B_PIN GPIO_NUM_18
+#define C_PIN GPIO_NUM_19
+#define D_PIN GPIO_NUM_21
 
 //LED Matrix Dimensions
 #define WIDTH 64
 #define HEIGHT 32
 
-//uint16_t* frameBuffer[2];
-//volatile bool back_buffer = 0;
+typedef struct 
+{
+    uint16_t* frameBuffer;
+    uint8_t brightness;
+} led_matrix_data_t;
+
 
 /*
     function: setup_i2s - set i2s and pin configuration and link i2s config to GPIO's
@@ -36,6 +40,14 @@
     output: void
 */
 void setup_i2s(void);
+
+/*
+    function: selectRow - set the A, B, C, D pins based on the row we are trying to obtain
+    input: int row
+    output: void (but the A B C D gpios will be set)
+*/
+void selectRow(int row);
+
 
 /*
     We must:
