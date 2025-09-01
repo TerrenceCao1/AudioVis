@@ -13,8 +13,9 @@
 #define I2S_SD GPIO_NUM_33
 #define I2S_PORT I2S_NUM_0
 #define BUFFER_SIZE 512
+#define FFT_BANDS 32
 
-extern SemaphoreHandle_t xBufferReadySem;
+extern QueueHandle_t bufferQueue;
 extern float bufferA[BUFFER_SIZE];
 extern float bufferB[BUFFER_SIZE];
 extern float *samplingBuffer;
