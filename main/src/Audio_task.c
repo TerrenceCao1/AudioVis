@@ -9,11 +9,12 @@
 
 QueueHandle_t bufferQueue;
 
-float bufferA[BUFFER_SIZE];
-float bufferB[BUFFER_SIZE];
+int32_t bufferA[BUFFER_SIZE];
+int32_t bufferB[BUFFER_SIZE];
 
-float *samplingBuffer = bufferA;
-float *fftBuffer = bufferB;
+int32_t *samplingBuffer = bufferA;
+int32_t *otherBuffer = bufferB;
+float fftBuffer[BUFFER_SIZE];
 
 void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig)
 {
@@ -49,19 +50,24 @@ void sampleAudioData(void * pvParameter)
     {
 		printf("sampling\n");
 		//error check + populate buffer:
-		esp_err_t ret = i2s_read(I2S_NUM_0, samplingBuffer, sizeof(uint32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+		esp_err_t ret = i2s_read(I2S_NUM_0, samplingBuffer, sizeof(int32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
 
-		if (!ret || (bytes_read != sizeof(float) * BUFFER_SIZE))
+		if (ret != ESP_OK)
 		{
 			printf("I2S read Error: %d, bytes: %u\n", ret, bytes_read);
 			vTaskDelay(pdMS_TO_TICKS(10));
-			continue;
+			while(1);
 		}
 
-		//copy the sampling buffer over to the fftBuffer through temp
-		float *temp = fftBuffer;
-		fftBuffer = samplingBuffer;
-		samplingBuffer = temp;
+		//INMP441 gives us 24 bit i2s, so we need to bitshift and typecast to float
+		for(int i = 0; i < BUFFER_SIZE; i++)
+		{
+			int32_t s24 = samplingBuffer[i] >> 8;
+			fftBuffer[i] = (float)s24 / 8388608.0f; //2^32 to normalize the float
+		}
+		int32_t* temp = samplingBuffer;
+		samplingBuffer = otherBuffer;
+		otherBuffer = temp;
 		
 		if(xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY))
 		{
@@ -105,10 +111,9 @@ void xFFT(void* pvParameters)
 				{
 					for(int j = bandBins[i]; j < bandBins[i+1]; j++)
 					{
-						bandAmps[i] += (float)fft_config->output[2*j];
+						bandAmps[i] += sqrtf(pow((float)fft_config->output[2*j], 2) + pow((float)fft_config->output[2*j + 1], 2));
 					}
 					bandAmps[i] /= (bandBins[i+1] - bandBins[i]);
-					bandAmps[i] /= fft_config->size;
 					printf("Bin %i Amp: %i\n", i, bandAmps[i]);
 				}
 			}
