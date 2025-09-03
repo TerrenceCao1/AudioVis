@@ -16,10 +16,11 @@
 #define FFT_BANDS 32
 
 extern QueueHandle_t bufferQueue;
-extern float bufferA[BUFFER_SIZE];
-extern float bufferB[BUFFER_SIZE];
-extern float *samplingBuffer;
-extern float *fftBuffer;
+extern int32_t bufferA[BUFFER_SIZE];
+extern int32_t bufferB[BUFFER_SIZE];
+extern int32_t *samplingBuffer;
+extern int32_t *otherBuffer;
+extern float fftBuffer[BUFFER_SIZE];
 
 /*
     functions needed:
