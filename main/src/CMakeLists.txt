@@ -8,10 +8,10 @@ idf_component_register(
         "main.c"
         "Audio_task.c"
         "LED_task.c"
-		"../esp32-fft/components/fft/fft.c"
+		"../../components/esp32-fft/components/fft/fft.c"
     INCLUDE_DIRS
         "../include"
-		"../esp32-fft/components/fft/include"
+		"../../components/esp32-fft/components/fft/include"
     REQUIRES
         driver
         freertos
