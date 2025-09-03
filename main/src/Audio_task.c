@@ -1,5 +1,6 @@
 #include "Audio_task.h"
 #include "driver/i2s.h"
+#include "freertos/projdefs.h"
 #include "portmacro.h"
 #include "string.h"
 #include "freertos/queue.h"
@@ -50,9 +51,9 @@ void sampleAudioData(void * pvParameter)
 		//error check + populate buffer:
 		esp_err_t ret = i2s_read(I2S_NUM_0, samplingBuffer, sizeof(uint32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
 
-		if (ret != ESP_OK || bytes_read != sizeof(float) * BUFFER_SIZE)
+		if (!ret || (bytes_read != sizeof(float) * BUFFER_SIZE))
 		{
-			printf("I2S read Error: %d, bytes: %d\n", ret, bytes_read);
+			printf("I2S read Error: %d, bytes: %u\n", ret, bytes_read);
 			vTaskDelay(pdMS_TO_TICKS(10));
 			continue;
 		}
@@ -62,20 +63,24 @@ void sampleAudioData(void * pvParameter)
 		fftBuffer = samplingBuffer;
 		samplingBuffer = temp;
 		
-		xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY);
-		printf("sampling done\n");
+		if(xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY))
+		{
+			printf("sampling done\n");
+		}
+
+		vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
 void xFFT(void* pvParameters)
 {
-    fft_config_t *fft_config = fft_init(512, FFT_REAL, FFT_FORWARD, NULL, NULL);
+    fft_config_t *fft_config = fft_init(BUFFER_SIZE, FFT_REAL, FFT_FORWARD, NULL, NULL);
 
 	int bandBins[FFT_BANDS+1]; //number of bands + 1 for edges
 	for(int i = 0; i < FFT_BANDS+1; i++)
 	{
 		//exponentially sized bins since human hearing is logarithmic
-		float f = pow(256, (float)i/FFT_BANDS);
+		float f = pow(BUFFER_SIZE/2, (float)i/FFT_BANDS);
 		bandBins[i] = (int)f;
 		
 		//make sure each frequency bin is actually different (low end is all the same)
@@ -100,12 +105,14 @@ void xFFT(void* pvParameters)
 				{
 					for(int j = bandBins[i]; j < bandBins[i+1]; j++)
 					{
-						bandAmps[i] += (int)fft_config->output[2*j];
+						bandAmps[i] += (float)fft_config->output[2*j];
 					}
-					bandAmps[i] /= bandBins[i+1] - bandBins[i];
+					bandAmps[i] /= (bandBins[i+1] - bandBins[i]);
+					bandAmps[i] /= fft_config->size;
 					printf("Bin %i Amp: %i\n", i, bandAmps[i]);
 				}
 			}
+			vTaskDelay(pdMS_TO_TICKS(10));
 		}
     taskYIELD();        
     fft_destroy(fft_config);
