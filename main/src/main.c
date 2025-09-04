@@ -36,9 +36,10 @@
 
 void app_main() {
 	//setup for the i2s
-    static i2s_config_t i2s_config;
-    static i2s_pin_config_t i2s_pin_config;
-    I2S_Init(&i2s_config, &i2s_pin_config);
+	i2s_chan_handle_t rx_handle;
+	i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_PORT, I2S_ROLE_MASTER);
+
+	I2S_Init(rx_handle, chan_cfg);
 
 	bufferQueue = xQueueCreate(2, sizeof(float*));
 

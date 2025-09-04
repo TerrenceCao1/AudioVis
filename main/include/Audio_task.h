@@ -1,5 +1,8 @@
 //headers for audio - taking samples from INMP and performing FFT
 #include "driver/i2s.h"
+#include "driver/i2s_common.h"
+#include "driver/i2s_std.h"
+#include "driver/i2s_types.h"
 #include "freertos/queue.h"
 #include <math.h>
 #include <fft.h>
@@ -8,7 +11,7 @@
 #define AUDIO_TASK_h_
 
 //setting the pins
-#define I2S_SCLK GPIO_NUM_32
+#define I2S_SCK GPIO_NUM_32
 #define I2S_WS GPIO_NUM_25
 #define I2S_SD GPIO_NUM_33
 #define I2S_PORT I2S_NUM_0
@@ -34,7 +37,7 @@ extern float fftBuffer[BUFFER_SIZE];
     input: void
     output: void
 */
-void I2S_Init(i2s_config_t *mainConfig, i2s_pin_config_t *pinConfig);
+void I2S_Init(i2s_chan_handle_t rx_handle, i2s_chan_config_t chan_cfg);
 
 /*
     function: sampleAudioData -> samples I2S audio data from IMNP441 microphone
