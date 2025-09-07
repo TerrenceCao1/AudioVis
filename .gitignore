@@ -2,7 +2,6 @@
 .clangd
 .gitignore
 build/
-test/
 
 platformio.ini
 sdkconfig
