@@ -77,7 +77,7 @@ void sampleAudioData(void * pvParameter)
 		for(int i = 0; i < BUFFER_SIZE; i++)
 		{
 			int32_t s24 = samplingBuffer[i] >> 8;
-			fftBuffer[i] = (float)s24 / 8388608.0f; //2^32 to normalize the float
+			fftBuffer[i] = (float)s24 * 100/ 8388608.0f; //2^32 to normalize the float
 		}
 		
 		if(xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY))
@@ -96,11 +96,11 @@ void xFFT(void* pvParameters)
 	int bandBins[FFT_BANDS+1]; //number of bands + 1 for edges
 	for(int i = 0; i < FFT_BANDS+1; i++)
 	{
-		bandBins[i] = i * (fft_config->size/32)/2;
+		bandBins[i] = i * (fft_config->size/32)/4; //only taking bottom 1/8 of frequencies since we can barely hear anything up
 	}
+	bandBins[0] += 2;
 
 	float bandAmps[FFT_BANDS];
-	
 		while (1)
 		{
 			if (xQueueReceive(bufferQueue, &fftBuffer, portMAX_DELAY))
@@ -108,7 +108,7 @@ void xFFT(void* pvParameters)
 				printf("start of FFT\n");
 				memcpy(fft_config->input, &fftBuffer, BUFFER_SIZE * sizeof(float));
 				fft_execute(fft_config);
-
+				
 				for (int i = 0; i < FFT_BANDS; i++)
 				{
 					for(int j = bandBins[i]; j < bandBins[i+1]; j++)
@@ -116,7 +116,7 @@ void xFFT(void* pvParameters)
 						bandAmps[i] += sqrtf(pow(fft_config->output[2*j], 2) + pow(fft_config->output[2*j + 1], 2));
 					}
 					bandAmps[i] /= (bandBins[i+1] - bandBins[i]);
-					printf("Bin %i Amp: %f\n", i, bandAmps[i]);
+					printf("%i, %f\n", i, bandAmps[i]);
 				}
 			}
 
