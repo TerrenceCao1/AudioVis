@@ -1,8 +1,8 @@
-#include "driver/i2s.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/idf_additions.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include "driver/i2s_std.h"
 #include "Audio_task.h"
 #include "LED_task.h"
 #include "esp_log.h"
@@ -35,13 +35,7 @@
 */
 
 void app_main() {
-	//setup for the i2s
-	i2s_chan_handle_t rx_handle;
-	i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_PORT, I2S_ROLE_MASTER);
-
-	I2S_Init(rx_handle, chan_cfg);
-
-	bufferQueue = xQueueCreate(2, sizeof(float*));
+	bufferQueue = xQueueCreate(1, sizeof(float*));
 
     xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 5, NULL, 0);
     xTaskCreatePinnedToCore(xFFT, "fft", 8192, NULL, 5, NULL, 0);

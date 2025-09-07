@@ -1,4 +1,3 @@
-//headers for audio - taking samples from INMP and performing FFT
 #include "driver/i2s.h"
 #include "driver/i2s_common.h"
 #include "driver/i2s_std.h"
@@ -19,10 +18,7 @@
 #define FFT_BANDS 32
 
 extern QueueHandle_t bufferQueue;
-extern int32_t bufferA[BUFFER_SIZE];
-extern int32_t bufferB[BUFFER_SIZE];
-extern int32_t *samplingBuffer;
-extern int32_t *otherBuffer;
+extern int32_t samplingBuffer[BUFFER_SIZE];
 extern float fftBuffer[BUFFER_SIZE];
 
 /*
@@ -37,7 +33,7 @@ extern float fftBuffer[BUFFER_SIZE];
     input: void
     output: void
 */
-void I2S_Init(i2s_chan_handle_t rx_handle, i2s_chan_config_t chan_cfg);
+void i2s_init(void);
 
 /*
     function: sampleAudioData -> samples I2S audio data from IMNP441 microphone

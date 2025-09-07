@@ -1,6 +1,7 @@
 #include "Audio_task.h"
-#include "driver/i2s.h"
 #include "driver/i2s_common.h"
+#include "driver/i2s_types.h"
+#include "esp_err.h"
 #include "freertos/projdefs.h"
 #include "hal/i2s_types.h"
 #include "portmacro.h"
@@ -12,15 +13,14 @@
 
 QueueHandle_t bufferQueue;
 
-int32_t bufferA[BUFFER_SIZE];
-int32_t bufferB[BUFFER_SIZE];
 
-int32_t *samplingBuffer = bufferA;
-int32_t *otherBuffer = bufferB;
+int32_t samplingBuffer[BUFFER_SIZE];
 float fftBuffer[BUFFER_SIZE];
 
+i2s_chan_handle_t rx_handle;
+i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_PORT, I2S_ROLE_MASTER);
 
-void I2S_Init(i2s_chan_handle_t rx_handle, i2s_chan_config_t chan_cfg)
+void i2s_init(void)
 {
     ESP_ERROR_CHECK(i2s_new_channel(&chan_cfg, NULL, &rx_handle));
 
@@ -55,15 +55,16 @@ void I2S_Init(i2s_chan_handle_t rx_handle, i2s_chan_config_t chan_cfg)
     ESP_ERROR_CHECK(i2s_channel_enable(rx_handle));
 }
 
+
+
 void sampleAudioData(void * pvParameter)
 {
     size_t bytes_read;
+	i2s_init();
 
     while (1)
     {
-		printf("sampling\n");
-		//error check + populate buffer:
-		esp_err_t ret = i2s_read(I2S_NUM_0, samplingBuffer, sizeof(int32_t) * BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+		esp_err_t ret = i2s_channel_read(rx_handle, samplingBuffer, sizeof(samplingBuffer), &bytes_read, portMAX_DELAY);
 
 		if (ret != ESP_OK)
 		{
@@ -78,9 +79,6 @@ void sampleAudioData(void * pvParameter)
 			int32_t s24 = samplingBuffer[i] >> 8;
 			fftBuffer[i] = (float)s24 / 8388608.0f; //2^32 to normalize the float
 		}
-		int32_t* temp = samplingBuffer;
-		samplingBuffer = otherBuffer;
-		otherBuffer = temp;
 		
 		if(xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY))
 		{
@@ -98,38 +96,30 @@ void xFFT(void* pvParameters)
 	int bandBins[FFT_BANDS+1]; //number of bands + 1 for edges
 	for(int i = 0; i < FFT_BANDS+1; i++)
 	{
-		//exponentially sized bins since human hearing is logarithmic
-		float f = pow(BUFFER_SIZE/2, (float)i/FFT_BANDS);
-		bandBins[i] = (int)f;
-		
-		//make sure each frequency bin is actually different (low end is all the same)
-		if(i > 0 && (bandBins[i] <=bandBins[i-1]))
-		{
-			bandBins[i] = bandBins[i-1] + 1;
-		}
+		bandBins[i] = i * (fft_config->size/32)/2;
 	}
 
-	int bandAmps[FFT_BANDS];
+	float bandAmps[FFT_BANDS];
 	
 		while (1)
 		{
 			if (xQueueReceive(bufferQueue, &fftBuffer, portMAX_DELAY))
 			{
 				printf("start of FFT\n");
-				memcpy(fft_config->input, fftBuffer, sizeof(float) * BUFFER_SIZE);
+				memcpy(fft_config->input, &fftBuffer, BUFFER_SIZE * sizeof(float));
 				fft_execute(fft_config);
-				
-				//for each bin, we add up all the fft real values between those bounds.
+
 				for (int i = 0; i < FFT_BANDS; i++)
 				{
 					for(int j = bandBins[i]; j < bandBins[i+1]; j++)
 					{
-						bandAmps[i] += sqrtf(pow((float)fft_config->output[2*j], 2) + pow((float)fft_config->output[2*j + 1], 2));
+						bandAmps[i] += sqrtf(pow(fft_config->output[2*j], 2) + pow(fft_config->output[2*j + 1], 2));
 					}
 					bandAmps[i] /= (bandBins[i+1] - bandBins[i]);
-					printf("Bin %i Amp: %i\n", i, bandAmps[i]);
+					printf("Bin %i Amp: %f\n", i, bandAmps[i]);
 				}
 			}
+
 			vTaskDelay(pdMS_TO_TICKS(10));
 		}
     taskYIELD();        
