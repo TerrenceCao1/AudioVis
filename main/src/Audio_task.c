@@ -89,39 +89,51 @@ void sampleAudioData(void * pvParameter)
     }
 }
 
+#define FFT_BANDS 32
+#define MIN_BAND_VALUE 2
+#define MAX_BAND_VALUE 128
+
 void xFFT(void* pvParameters)
 {
     fft_config_t *fft_config = fft_init(BUFFER_SIZE, FFT_REAL, FFT_FORWARD, NULL, NULL);
 
 	int bandBins[FFT_BANDS+1]; //number of bands + 1 for edges
-	for(int i = 0; i < FFT_BANDS+1; i++)
+	bandBins[0] = 2;
+	for(int i = 1; i < FFT_BANDS+1; i++)
 	{
-		bandBins[i] = i * (fft_config->size/32)/4; //only taking bottom 1/8 of frequencies since we can barely hear anything up
+		double ratio = (double)i/FFT_BANDS;
+		double value = MIN_BAND_VALUE * pow((double)MAX_BAND_VALUE/MIN_BAND_VALUE, ratio);
+
+		bandBins[i] = (int)round(value);
+
+		if(bandBins[i] <= bandBins[i-1])
+		{
+			bandBins[i] = bandBins[i-1] + 1;
+		}
 	}
-	bandBins[0] += 2;
 
 	float bandAmps[FFT_BANDS];
-		while (1)
+	while (1)
+	{
+		if (xQueueReceive(bufferQueue, &fftBuffer, portMAX_DELAY))
 		{
-			if (xQueueReceive(bufferQueue, &fftBuffer, portMAX_DELAY))
+			printf("start of FFT\n");
+			memcpy(fft_config->input, &fftBuffer, BUFFER_SIZE * sizeof(float));
+			fft_execute(fft_config);
+			
+			for (int i = 0; i < FFT_BANDS; i++)
 			{
-				printf("start of FFT\n");
-				memcpy(fft_config->input, &fftBuffer, BUFFER_SIZE * sizeof(float));
-				fft_execute(fft_config);
-				
-				for (int i = 0; i < FFT_BANDS; i++)
+				for(int j = bandBins[i]; j < bandBins[i+1]; j++)
 				{
-					for(int j = bandBins[i]; j < bandBins[i+1]; j++)
-					{
-						bandAmps[i] += sqrtf(pow(fft_config->output[2*j], 2) + pow(fft_config->output[2*j + 1], 2));
-					}
-					bandAmps[i] /= (bandBins[i+1] - bandBins[i]);
-					printf("%i, %f\n", i, bandAmps[i]);
+					bandAmps[i] += sqrtf(pow(fft_config->output[2*j], 2) + pow(fft_config->output[2*j + 1], 2));
 				}
+				printf("%i, %f\n", i, bandAmps[i]);
 			}
-
-			vTaskDelay(pdMS_TO_TICKS(10));
 		}
+		memset(bandAmps, 0, sizeof(bandAmps));
+
+		vTaskDelay(pdMS_TO_TICKS(10));
+	}
     taskYIELD();        
     fft_destroy(fft_config);
 }
