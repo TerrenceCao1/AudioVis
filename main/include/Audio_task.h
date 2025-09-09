@@ -1,7 +1,7 @@
-#include "driver/i2s.h"
 #include "driver/i2s_common.h"
 #include "driver/i2s_std.h"
 #include "driver/i2s_types.h"
+#include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include <math.h>
 #include <fft.h>
