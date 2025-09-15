@@ -12,7 +12,7 @@ bin_vals = np.zeros(num_bins, dtype=np.int64)
 
 fig, ax = plt.subplots()
 bars = ax.bar(np.arange(num_bins), bin_vals)
-ax.set_ylim(0, 200)  # adjust depending on your data scale
+ax.set_ylim(0, 250)
 ax.set_xlabel("Bin")
 ax.set_ylabel("Value")
 ax.set_title("Frequency Bins")
