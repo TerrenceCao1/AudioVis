@@ -22,7 +22,9 @@ extern "C" {
 #define HEIGHT 32
 
 void matrix_init(int width, int height);
+void matrix_clear();
 void matrix_draw_pixel(int x, int y, uint16_t color);
+void matrix_draw_row(int row, uint64_t data, uint16_t color);
 
 
 #ifdef __cplusplus

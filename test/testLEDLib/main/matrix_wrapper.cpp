@@ -37,6 +37,11 @@ void matrix_init(int width, int height)
 	dma_display->clearScreen();
 }
 
+void matrix_clear()
+{
+	dma_display->clearScreen();
+}
+
 void matrix_draw_pixel(int x, int y, uint16_t color)
 {
 	if(dma_display)
@@ -45,7 +50,7 @@ void matrix_draw_pixel(int x, int y, uint16_t color)
 	}
 }
 
-void matrix_draw_row(uint64_t data, uint16_t color)
+void matrix_draw_row(int row, uint64_t data, uint16_t color)
 {
 	if(!dma_display)
 	{
@@ -56,8 +61,12 @@ void matrix_draw_row(uint64_t data, uint16_t color)
 	{
 		if((data >> i) & 0x1)
 		{
-			dma_display->drawPixel(i, 0, 0xFFFF);
+			dma_display->drawPixel(i, row, color);
 		}
 	}
 }
+
+
+
 }
+
