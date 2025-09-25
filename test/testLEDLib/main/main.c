@@ -3,7 +3,24 @@
 
 void app_main(void)
 {
-	matrix_init(64, 32);
-	matrix_draw_pixel(10, 10, 0xFF00);
-	matrix_draw_row(5, 0xFFF000F3F21F931F, 0xFFFF);
+	int levels[WIDTH/2];
+	for(int i = 0; i < WIDTH/2; i++)
+	{
+		levels[i] = i;
+	}
+	matrix_init(WIDTH, HEIGHT);
+
+	matrix_draw_pixel(5, 10, 0xF000);
+
+	/*
+	while(1)
+	{
+		for(int i = 0; i < HEIGHT; i++)
+		{
+			matrix_draw_row(i, 0xFF88FF88FF88FF88, 0xFFFF);
+			esp_rom_delay_us(100000);
+		}
+		matrix_clear();
+		esp_rom_delay_us(1000000);
+	}*/
 }

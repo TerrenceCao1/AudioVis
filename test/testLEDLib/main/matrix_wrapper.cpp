@@ -39,15 +39,21 @@ void matrix_init(int width, int height)
 
 void matrix_clear()
 {
+	if(!dma_display)
+	{
+		return;
+	}
 	dma_display->clearScreen();
 }
 
 void matrix_draw_pixel(int x, int y, uint16_t color)
 {
-	if(dma_display)
+	if(!dma_display)
 	{
-		dma_display->drawPixel(x, y, color);
+		return;
 	}
+
+	dma_display->drawPixel(x, y, color);
 }
 
 void matrix_draw_row(int row, uint64_t data, uint16_t color)
@@ -66,6 +72,27 @@ void matrix_draw_row(int row, uint64_t data, uint16_t color)
 	}
 }
 
+void matrix_draw_audio_levels(int* levels)
+{
+	if(!dma_display) 
+	{
+		return;
+	}
+
+	uint64_t rowBuffer = 0;
+	for(int row = 0; row < HEIGHT; row++)
+	{
+		for(int bin = 0; bin < WIDTH/2; bin++)
+		{
+			int binHeight = *(levels + bin);
+			if(binHeight > row)
+			{
+				rowBuffer |= 0b11 << bin;
+			}
+		}
+		matrix_draw_row(row, rowBuffer, 0xFFFF);
+	}
+}
 
 
 }
