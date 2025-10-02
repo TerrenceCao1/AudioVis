@@ -6,7 +6,7 @@ extern "C"
 
 MatrixPanel_I2S_DMA *dma_display = nullptr;
 
-HUB75_I2S_CFG::i2s_pins hub75_pins =
+HUB75_I2S_CFG::i2s_pins hub75_pins = 
 {
 	.r1 = R0_PIN,
 	.g1 = G0_PIN,
@@ -33,7 +33,7 @@ void matrix_init(int width, int height)
 
 	dma_display = new MatrixPanel_I2S_DMA(mxconfig);
 	dma_display->begin();
-	dma_display->setPanelBrightness(50);
+	dma_display->setPanelBrightness(80);
 	dma_display->clearScreen();
 }
 
@@ -52,7 +52,6 @@ void matrix_draw_pixel(int x, int y, uint16_t color)
 	{
 		return;
 	}
-
 	dma_display->drawPixel(x, y, color);
 }
 
@@ -67,7 +66,7 @@ void matrix_draw_row(int row, uint64_t data, uint16_t color)
 	{
 		if((data >> i) & 0x1)
 		{
-			dma_display->drawPixel(i, row, color);
+			matrix_draw_pixel(i, row, 0xFFFF);
 		}
 	}
 }
@@ -80,20 +79,21 @@ void matrix_draw_audio_levels(int* levels)
 	}
 
 	uint64_t rowBuffer = 0;
+	//for each row:
+		//go through each pixel and:
+			//check if that bin is 
 	for(int row = 0; row < HEIGHT; row++)
 	{
-		for(int bin = 0; bin < WIDTH/2; bin++)
+		for(int column = 0; column < WIDTH; column += 2)
 		{
-			int binHeight = *(levels + bin);
-			if(binHeight > row)
+			if(levels[column] > (32-row)) 
 			{
-				rowBuffer |= 0b11 << bin;
+				rowBuffer |= (0b11 << column);
 			}
 		}
 		matrix_draw_row(row, rowBuffer, 0xFFFF);
+		rowBuffer = 0;
 	}
 }
-
-
 }
 

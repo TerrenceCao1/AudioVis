@@ -21,6 +21,8 @@ extern "C" {
 #define WIDTH 64
 #define HEIGHT 32
 
+#define WHITE 0xFFFF
+
 void matrix_init(int width, int height);
 void matrix_clear();
 void matrix_draw_pixel(int x, int y, uint16_t color);
