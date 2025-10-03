@@ -33,7 +33,7 @@ void matrix_init(int width, int height)
 
 	dma_display = new MatrixPanel_I2S_DMA(mxconfig);
 	dma_display->begin();
-	dma_display->setPanelBrightness(80);
+	dma_display->setPanelBrightness(40);
 	dma_display->clearScreen();
 }
 
@@ -79,19 +79,17 @@ void matrix_draw_audio_levels(int* levels)
 	}
 
 	uint64_t rowBuffer = 0;
-	//for each row:
-		//go through each pixel and:
-			//check if that bin is 
+
 	for(int row = 0; row < HEIGHT; row++)
 	{
-		for(int column = 0; column < WIDTH; column += 2)
+		for(int bin = 0; bin < WIDTH/2; bin++)
 		{
-			if(levels[column] > (32-row)) 
+			if(levels[bin] >= row)
 			{
-				rowBuffer |= (0b11 << column);
+				rowBuffer |= (3ULL << (bin * 2)); //3ULL is 0b11
 			}
 		}
-		matrix_draw_row(row, rowBuffer, 0xFFFF);
+		matrix_draw_row(HEIGHT-row-1, rowBuffer, 0xFFFF);
 		rowBuffer = 0;
 	}
 }
