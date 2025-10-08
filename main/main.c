@@ -36,5 +36,5 @@ void app_main() {
 
     xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 5, NULL, 0);
     xTaskCreatePinnedToCore(xFFT, "FFT", 8192, NULL, 5, NULL, 0);
-	xTaskCreatePinnedToCore(xDrawLEDLevels, "DrawLEDLevels", 8192, NULL, 5, NULL, 1);
+	xTaskCreatePinnedToCore(xPrintLEDBuffer, "DrawLEDLevels", 4096, NULL, 5, NULL, 1);
 }
