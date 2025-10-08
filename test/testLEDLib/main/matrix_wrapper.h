@@ -31,7 +31,7 @@ void matrix_init(int width, int height);
 void matrix_clear();
 void matrix_draw_pixel(int x, int y, uint16_t color);
 void matrix_draw_row(int row, uint64_t data, uint16_t color);
-void matrix_draw_audio_levels(int* levels);
+void matrix_draw_audio_levels(float* levels);
 
 
 #ifdef __cplusplus

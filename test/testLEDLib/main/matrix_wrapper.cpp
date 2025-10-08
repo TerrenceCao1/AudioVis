@@ -71,7 +71,7 @@ void matrix_draw_row(int row, uint64_t data, uint16_t color)
 	}
 }
 
-void matrix_draw_audio_levels(int* levels)
+void matrix_draw_audio_levels(float* levels)
 {
 	if(!dma_display) 
 	{
@@ -94,4 +94,3 @@ void matrix_draw_audio_levels(int* levels)
 	}
 }
 }
-
