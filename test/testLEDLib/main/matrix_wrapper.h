@@ -1,3 +1,7 @@
+#ifndef MATRIX_WRAPPER_H
+#define MATRIX_WRAPPER_H
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,3 +37,5 @@ void matrix_draw_audio_levels(int* levels);
 #ifdef __cplusplus
 }
 #endif
+
+#endif //MATRIX_WRAPPER_H
