@@ -9,14 +9,15 @@
 #ifndef AUDIO_TASK_h_
 #define AUDIO_TASK_h_
 
-//setting the pins
 #define I2S_SCK GPIO_NUM_32
 #define I2S_WS GPIO_NUM_25
 #define I2S_SD GPIO_NUM_33
 #define I2S_PORT I2S_NUM_0
 #define BUFFER_SIZE 512
+#define FFT_BANDS 32
 
 extern QueueHandle_t bufferQueue;
+extern QueueHandle_t fftToLEDQueue;
 extern int32_t samplingBuffer[BUFFER_SIZE];
 extern float fftBuffer[BUFFER_SIZE];
 

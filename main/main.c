@@ -1,12 +1,6 @@
-#include "freertos/FreeRTOS.h"
-#include "freertos/idf_additions.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "driver/i2s_std.h"
-#include "Audio_task.h"
+#include <matrix_wrapper.h>
 #include "LED_task.h"
-#include "esp_log.h"
-
+#include "Audio_task.h"
 
 /*
     INMP441 PINOUT/WIRING:
@@ -36,7 +30,11 @@
 
 void app_main() {
 	bufferQueue = xQueueCreate(1, sizeof(float*));
+	fftToLEDQueue = xQueueCreate(1, sizeof(float*));
+
+	matrix_init(WIDTH, HEIGHT);
 
     xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 5, NULL, 0);
-    xTaskCreatePinnedToCore(xFFT, "fft", 8192, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(xFFT, "FFT", 8192, NULL, 5, NULL, 0);
+	xTaskCreatePinnedToCore(xDrawLEDLevels, "DrawLEDLevels", 8192, NULL, 5, NULL, 1);
 }

@@ -7,11 +7,10 @@
 #include "portmacro.h"
 #include "string.h"
 #include "freertos/queue.h"
-#include "math.h"
-#include "fft.h"
 #include "driver/i2s_std.h"
 
 QueueHandle_t bufferQueue;
+QueueHandle_t fftToLEDQueue;
 
 
 int32_t samplingBuffer[BUFFER_SIZE];
@@ -80,10 +79,7 @@ void sampleAudioData(void * pvParameter)
 			fftBuffer[i] = (float)s24 * 100/ 8388608.0f; //2^32 to normalize the float
 		}
 		
-		if(xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY))
-		{
-			printf("sampling done\n");
-		}
+		if(xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY)){}
 
 		vTaskDelay(pdMS_TO_TICKS(10));
     }
@@ -117,7 +113,6 @@ void xFFT(void* pvParameters)
 	{
 		if (xQueueReceive(bufferQueue, &fftBuffer, portMAX_DELAY))
 		{
-			printf("start of FFT\n");
 			memcpy(fft_config->input, &fftBuffer, BUFFER_SIZE * sizeof(float));
 			fft_execute(fft_config);
 			
@@ -127,10 +122,10 @@ void xFFT(void* pvParameters)
 				{
 					bandAmps[i] += sqrtf(pow(fft_config->output[2*j], 2) + pow(fft_config->output[2*j + 1], 2));
 				}
-				printf("%i, %f\n", i, bandAmps[i]);
 			}
 		}
 		memset(bandAmps, 0, sizeof(bandAmps));
+		xQueueSend(fftToLEDQueue, &fftBuffer, portMAX_DELAY);
 
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
