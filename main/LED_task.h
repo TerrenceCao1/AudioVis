@@ -20,4 +20,5 @@ extern QueueHandle_t fftToLEDQueue;
  * */
 void xDrawLEDLevels(void *pvParameter);
 
+void xPrintLEDBuffer(void *pvParameter);
 #endif //LED_TASK_h_
