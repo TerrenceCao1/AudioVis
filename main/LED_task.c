@@ -7,13 +7,16 @@
 
 void xDrawLEDLevels(void *pvParameter)
 {
-	float floatLEDBuffer[WIDTH/2];
+	matrix_init(WIDTH, HEIGHT);
 	while(1)
 	{
-		if(xQueueReceive(fftToLEDQueue, &floatLEDBuffer, portMAX_DELAY))
+		if(xSemaphoreTake(LEDBufferMutex, portMAX_DELAY))
 		{
+			printf("Mutex Taken by LED Task");
 			matrix_clear();
-			matrix_draw_audio_levels(floatLEDBuffer);
+			matrix_draw_audio_levels(LED_Buffer);
+
+			xSemaphoreGive(LEDBufferMutex);
 		}
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
@@ -22,6 +25,7 @@ void xDrawLEDLevels(void *pvParameter)
 void xPrintLEDBuffer(void *pvParameter)
 {
 	float floatLEDBuffer[WIDTH/2];
+	matrix_init(WIDTH, HEIGHT);
 	while(1)
 	{
 		if(xQueueReceive(fftToLEDQueue, &floatLEDBuffer, portMAX_DELAY)) 
@@ -30,7 +34,7 @@ void xPrintLEDBuffer(void *pvParameter)
 			{
 				printf("floatLEDBuffer[%i]: %f\n", i, floatLEDBuffer[i]);
 			}
-			vTaskDelay(pdTICKS_TO_MS(1000));
+			vTaskDelay(pdTICKS_TO_MS(10));
 		}
 	}
 }

@@ -1,6 +1,7 @@
 #include <matrix_wrapper.h>
 #include "LED_task.h"
 #include "Audio_task.h"
+#include "freertos/idf_additions.h"
 
 /*
     INMP441 PINOUT/WIRING:
@@ -31,9 +32,10 @@
 void app_main() {
 	bufferQueue = xQueueCreate(1, sizeof(float*));
 	fftToLEDQueue = xQueueCreate(1, sizeof(float*));
+	LEDBufferMutex = xSemaphoreCreateMutex();
 
 
-    //xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 4, NULL, 0);
-    //xTaskCreatePinnedToCore(xFFT, "FFT", 8192, NULL, 4, NULL, 0);
-	xTaskCreatePinnedToCore(xPrintLEDBuffer, "DrawLEDLevels", 20000, NULL, 5, NULL, 1);
+    xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 4, NULL, 0);
+    xTaskCreatePinnedToCore(xFFT, "FFT", 8192, NULL, 4, NULL, 0);
+	xTaskCreatePinnedToCore(xDrawLEDLevels, "DrawLEDLevels", 8192, NULL, 5, NULL, 1);
 }
