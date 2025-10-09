@@ -84,7 +84,7 @@ void matrix_draw_audio_levels(float* levels)
 	{
 		for(int bin = 0; bin < WIDTH/2; bin++)
 		{
-			if(levels[bin] >= row)
+			if(levels[bin]/2 >= row)
 			{
 				rowBuffer |= (3ULL << (bin * 2)); //3ULL is 0b11
 			}

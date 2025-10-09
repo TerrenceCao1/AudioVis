@@ -23,12 +23,6 @@ extern float fftBuffer[BUFFER_SIZE];
 
 extern SemaphoreHandle_t LEDBufferMutex;
 extern float LED_Buffer[FFT_BANDS];
-/*
-    functions needed:
-        I2S_Init
-        Sample_I2S_Audio
-        FFT_Audio_Sample
-*/
 
 /*
     function: I2S_Init -> initialize i2s_config and i2s_pin_config and install i2s driver
