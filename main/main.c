@@ -32,9 +32,8 @@ void app_main() {
 	bufferQueue = xQueueCreate(1, sizeof(float*));
 	fftToLEDQueue = xQueueCreate(1, sizeof(float*));
 
-	matrix_init(WIDTH, HEIGHT);
 
-    xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 5, NULL, 0);
-    xTaskCreatePinnedToCore(xFFT, "FFT", 8192, NULL, 5, NULL, 0);
-	xTaskCreatePinnedToCore(xPrintLEDBuffer, "DrawLEDLevels", 4096, NULL, 5, NULL, 1);
+    //xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 4, NULL, 0);
+    //xTaskCreatePinnedToCore(xFFT, "FFT", 8192, NULL, 4, NULL, 0);
+	xTaskCreatePinnedToCore(xPrintLEDBuffer, "DrawLEDLevels", 20000, NULL, 5, NULL, 1);
 }

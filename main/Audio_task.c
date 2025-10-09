@@ -78,10 +78,7 @@ void sampleAudioData(void * pvParameter)
 			fftBuffer[i] = (float)s24 * 100/ 8388608.0f; //2^32 to normalize the float
 		}
 		
-		if(xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY))
-		{
-			printf("finished sampling\n");
-		}
+		if(xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY)){}
 
 		vTaskDelay(pdMS_TO_TICKS(10));
     }
@@ -92,6 +89,9 @@ void sampleAudioData(void * pvParameter)
 #define MAX_BAND_VALUE 128
 
 // TODO: Double Buffer sending the BandAmps to the fftToLEDQueue. 
+
+//for double buffering to send to other task.
+float LED_Buffer[FFT_BANDS];
 
 void xFFT(void* pvParameters)
 {
@@ -127,10 +127,12 @@ void xFFT(void* pvParameters)
 					bandAmps[i] += sqrtf(pow(fft_config->output[2*j], 2) + pow(fft_config->output[2*j + 1], 2));
 				}
 				bandAmps[i] /= (bandBins[i+1] - bandBins[i]);
-				printf("%i, %f\n", i, bandAmps[i]);
+				printf("bandAmps[%i]: %f\n", i, bandAmps[i]);
 			}
+			memcpy(&LED_Buffer, &bandAmps, sizeof(bandAmps));
 		}
-		printf("FFT Done\n");
+		xQueueSend(fftToLEDQueue, &LED_Buffer, portMAX_DELAY);
+
 		memset(&bandAmps, 0, sizeof(bandAmps));
 
 		vTaskDelay(pdMS_TO_TICKS(10));
