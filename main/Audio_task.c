@@ -2,6 +2,7 @@
 #include "driver/i2s_common.h"
 #include "driver/i2s_types.h"
 #include "esp_err.h"
+#include "freertos/idf_additions.h"
 #include "freertos/projdefs.h"
 #include "hal/i2s_types.h"
 #include "portmacro.h"
@@ -90,15 +91,16 @@ void sampleAudioData(void * pvParameter)
 
 // TODO: Double Buffer sending the BandAmps to the fftToLEDQueue. 
 
-//for double buffering to send to other task.
+SemaphoreHandle_t LEDBufferMutex;
 float LED_Buffer[FFT_BANDS];
 
 void xFFT(void* pvParameters)
 {
     fft_config_t *fft_config = fft_init(BUFFER_SIZE, FFT_REAL, FFT_FORWARD, NULL, NULL);
 
+	//creating borders for the FFT_Bins
 	int bandBins[FFT_BANDS+1]; //number of bands + 1 for edges
-	bandBins[0] = 2;
+	bandBins[0] = MIN_BAND_VALUE;
 	for(int i = 1; i < FFT_BANDS+1; i++)
 	{
 		double ratio = (double)i/FFT_BANDS;
@@ -127,14 +129,17 @@ void xFFT(void* pvParameters)
 					bandAmps[i] += sqrtf(pow(fft_config->output[2*j], 2) + pow(fft_config->output[2*j + 1], 2));
 				}
 				bandAmps[i] /= (bandBins[i+1] - bandBins[i]);
-				printf("bandAmps[%i]: %f\n", i, bandAmps[i]);
 			}
-			memcpy(&LED_Buffer, &bandAmps, sizeof(bandAmps));
+
+			if(xSemaphoreTake(LEDBufferMutex, portMAX_DELAY))
+			{
+				printf("Mutex taked by FFT Task\n");
+				memcpy(LED_Buffer, bandAmps, sizeof(bandAmps));
+				xSemaphoreGive(LEDBufferMutex);
+			}
+
+			memset(&bandAmps, 0, sizeof(bandAmps));
 		}
-		xQueueSend(fftToLEDQueue, &LED_Buffer, portMAX_DELAY);
-
-		memset(&bandAmps, 0, sizeof(bandAmps));
-
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
     taskYIELD();        

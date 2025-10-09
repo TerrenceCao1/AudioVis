@@ -21,6 +21,8 @@ extern QueueHandle_t fftToLEDQueue;
 extern int32_t samplingBuffer[BUFFER_SIZE];
 extern float fftBuffer[BUFFER_SIZE];
 
+extern SemaphoreHandle_t LEDBufferMutex;
+extern float LED_Buffer[FFT_BANDS];
 /*
     functions needed:
         I2S_Init
