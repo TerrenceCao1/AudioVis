@@ -13,12 +13,12 @@
 extern QueueHandle_t fftToLEDQueue;
 
 /*
-	function: xDrawLEDLevels -> take in the fft data and draw it onto the LED matrix
-	input: pointer to buffer containing audio data
-	output: void
+ * @brief	Takes data from FFT function and displays onto the LED Matrix
  *
- * */
+ *			This function waits for the FFT function to finish populating a buffer of LED Levels based on amplitude of specific frequency bins
+ *
+ * @return	void
+*/
 void xDrawLEDLevels(void *pvParameter);
 
-void xPrintLEDBuffer(void *pvParameter);
 #endif //LED_TASK_h_

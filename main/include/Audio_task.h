@@ -24,24 +24,25 @@ extern SemaphoreHandle_t LEDBufferMutex;
 extern float LED_Buffer[FFT_BANDS];
 
 /*
-    function: I2S_Init -> initialize i2s_config and i2s_pin_config and install i2s driver
-    input: void
-    output: void
+ * @brief	Initiates I2S communication between esp32 microcontroller and INMP441 Microphone
+ *
+ *			Configures settings compatible with INMP441, sets pinout, and creates I2S Channel
 */
 void i2s_init(void);
 
 /*
-    function: sampleAudioData -> samples I2S audio data from IMNP441 microphone
-    input: buffer array to be filled with data
-    output: buffer gets filled with audio data
+ * @brief	Obtains raw I2S Audio Data from INMP441 and formats it for FFT function
+ *
+ *			This function reads I2S from INMP441, stores it into a samplingBuffer, copies it over and normalizes each data point as a float, and sends a pointer to the new buffer over a Queue.
+ *
 */
 void sampleAudioData(void *pvParameter);
 
 /*
-    function: fastFourierTransform -> takes buffer array and performs a fast fourier transform
-    input: pointer to buffer containing audio data
-    output: void
-*/
+ * @brief	Performs Fast Fourier Transform on I2S data to obtain frequency and amplitude data
+ *
+ *			This function creates frequency bins (chunking a 512pt FFT into 32 bins for later use), recieves a pointer to the raw audio data, performs the FFT and sums the frequencies in each bin. 
+* */
 void xFFT(void *pvParameter);
 
 #endif //AUDIO_TASK_h_

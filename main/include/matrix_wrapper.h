@@ -27,11 +27,54 @@ extern "C" {
 
 #define WHITE 0xFFFF
 
+/*
+ * @brief	Initiates LED Matrix panel and clears the screen
+ *
+ *			Sets width, height, and brightness parameters
+ *
+ * @param	width in pixels
+ * @param	height in pixels
+ * */
 void matrix_init(int width, int height);
+
+/*
+ * @brief	Clears LED Matrix 
+ *
+ *			turns all pixels off and wipes all data from shift registers
+ * */
 void matrix_clear();
+
+/*
+ * @brief	draws a pixel anywhere on display
+ *
+ *			shifts RGB data to a location and displays
+ *
+ * @param	x - x position of pixel drawn
+ * @param	y - y position of pixel drawn
+ * @param	color - RGB565 color used for pixel
+ * */
 void matrix_draw_pixel(int x, int y, uint16_t color);
+
+/*
+ * @brief	draws a row on the LED Matrix using a data buffer
+ *
+ *			parses uint64_t buffer which tells it which pixels to light up on a given row of a certain color
+ *
+ * @param	row - which row we draw to (starting 0 at the top until HEIGHT - 1 for the Bottom)
+ * @param	data - uint64_t buffer containing which pixels are to be lit up
+ * @param	color - RGB565 color used for the row
+ * */
 void matrix_draw_row(int row, uint64_t data, uint16_t color);
-void matrix_draw_audio_levels(float* levels);
+
+/*
+ * @brief	draws pillar looking bars to indicate audio frequencies
+ *
+ *			takes a buffer of audio frequency levels, and displays them onto the matrix 
+ *			
+ * @param	levels - pointer to buffer containing audio frequency amplitude data
+ * @param	color - RGB565 color used by the matrix
+ * */
+void matrix_draw_audio_levels(float* levels, uint16_t color);
 
 
 #ifdef __cplusplus

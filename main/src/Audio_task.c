@@ -119,7 +119,7 @@ void xFFT(void* pvParameters)
 		{
 			memcpy(fft_config->input, &fftBuffer, BUFFER_SIZE * sizeof(float));
 			fft_execute(fft_config);
-			
+
 			for (int i = 0; i < FFT_BANDS; i++)
 			{
 				for(int j = bandBins[i]; j < bandBins[i+1]; j++)
@@ -131,7 +131,6 @@ void xFFT(void* pvParameters)
 
 			if(xSemaphoreTake(LEDBufferMutex, portMAX_DELAY))
 			{
-				printf("Mutex taked by FFT Task\n");
 				memcpy(LED_Buffer, bandAmps, sizeof(bandAmps));
 				xSemaphoreGive(LEDBufferMutex);
 			}

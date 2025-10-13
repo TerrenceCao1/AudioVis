@@ -66,12 +66,12 @@ void matrix_draw_row(int row, uint64_t data, uint16_t color)
 	{
 		if((data >> i) & 0x1)
 		{
-			matrix_draw_pixel(i, row, 0xFFFF);
+			matrix_draw_pixel(i, row, color);
 		}
 	}
 }
 
-void matrix_draw_audio_levels(float* levels)
+void matrix_draw_audio_levels(float* levels, uint16_t color)
 {
 	if(!dma_display) 
 	{
@@ -84,12 +84,12 @@ void matrix_draw_audio_levels(float* levels)
 	{
 		for(int bin = 0; bin < WIDTH/2; bin++)
 		{
-			if(levels[bin]/2 >= row)
+			if(levels[bin]/2 >= row) //divide by 2 to make the levels appear lower
 			{
 				rowBuffer |= (3ULL << (bin * 2)); //3ULL is 0b11
 			}
 		}
-		matrix_draw_row(HEIGHT-row-1, rowBuffer, 0xFFFF);
+		matrix_draw_row(HEIGHT-row-1, rowBuffer, color);
 		rowBuffer = 0;
 	}
 }

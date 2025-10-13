@@ -1,5 +1,4 @@
 #include "LED_task.h"
-#include "fft.h"
 #include "freertos/idf_additions.h"
 #include "freertos/projdefs.h"
 #include "matrix_wrapper.h"
@@ -12,9 +11,8 @@ void xDrawLEDLevels(void *pvParameter)
 	{
 		if(xSemaphoreTake(LEDBufferMutex, portMAX_DELAY))
 		{
-			printf("Mutex Taken by LED Task");
 			matrix_clear();
-			matrix_draw_audio_levels(LED_Buffer);
+			matrix_draw_audio_levels(LED_Buffer, 0xF45F);
 
 			xSemaphoreGive(LEDBufferMutex);
 		}
