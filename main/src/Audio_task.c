@@ -87,7 +87,7 @@ void sampleAudioData(void * pvParameter)
 
 #define FFT_BANDS 32
 #define MIN_BAND_VALUE 2
-#define MAX_BAND_VALUE 64
+#define MAX_BAND_VALUE 32
 
 SemaphoreHandle_t LEDBufferMutex;
 float LED_Buffer[FFT_BANDS];
