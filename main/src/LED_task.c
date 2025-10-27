@@ -4,6 +4,7 @@
 #include "matrix_wrapper.h"
 #include "portmacro.h"
 
+// TODO: Color changing Button!
 void xDrawLEDLevels(void *pvParameter)
 {
 	matrix_init(WIDTH, HEIGHT);
@@ -12,7 +13,7 @@ void xDrawLEDLevels(void *pvParameter)
 		if(xSemaphoreTake(LEDBufferMutex, portMAX_DELAY))
 		{
 			matrix_clear();
-			matrix_draw_audio_levels(LED_Buffer, 0xF45F);
+			matrix_draw_audio_levels(LED_Buffer, 0xFFFF);
 
 			xSemaphoreGive(LEDBufferMutex);
 		}
