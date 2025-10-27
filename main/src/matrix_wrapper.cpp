@@ -71,6 +71,7 @@ void matrix_draw_row(int row, uint64_t data, uint16_t color)
 	}
 }
 
+// TODO: sensitivity buttons 
 void matrix_draw_audio_levels(float* levels, uint16_t color)
 {
 	if(!dma_display) 
@@ -84,7 +85,7 @@ void matrix_draw_audio_levels(float* levels, uint16_t color)
 	{
 		for(int bin = 0; bin < WIDTH/2; bin++)
 		{
-			if(levels[bin]/2 >= row) //divide by 2 to make the levels appear lower
+			if(levels[bin]/4 >= row) //dividing by four seems like a good sensitivity
 			{
 				rowBuffer |= (3ULL << (bin * 2)); //3ULL is 0b11
 			}
