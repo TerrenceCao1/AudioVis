@@ -3,7 +3,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include <math.h>
-#include <fft.h>
+#include <FFT.h>
 
 #ifndef AUDIO_TASK_h_
 #define AUDIO_TASK_h_

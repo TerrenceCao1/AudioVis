@@ -94,7 +94,7 @@ float LED_Buffer[FFT_BANDS];
 
 void xFFT(void* pvParameters)
 {
-    fft_config_t *fft_config = fft_init(BUFFER_SIZE, FFT_REAL, FFT_FORWARD, NULL, NULL);
+    fft_config_t* fft_config = fft_init(BUFFER_SIZE, NULL, NULL);
 
 	//creating borders for the FFT_Bins
 	int bandBins[FFT_BANDS+1]; //number of bands + 1 for edges
@@ -117,14 +117,14 @@ void xFFT(void* pvParameters)
 	{
 		if (xQueueReceive(bufferQueue, &fftBuffer, portMAX_DELAY))
 		{
-			memcpy(fft_config->input, &fftBuffer, BUFFER_SIZE * sizeof(float));
-			fft_execute(fft_config);
+			memcpy(fft_config->realInput, &fftBuffer, BUFFER_SIZE * sizeof(float));
+			real_fft_execute(fft_config);
 
 			for (int i = 0; i < FFT_BANDS; i++)
 			{
 				for(int j = bandBins[i]; j < bandBins[i+1]; j++)
 				{
-					bandAmps[i] += sqrtf(pow(fft_config->output[2*j], 2) + pow(fft_config->output[2*j + 1], 2));
+					bandAmps[i] += sqrtf(pow(fft_config->realInput[j], 2) + pow(fft_config->imagInput[j], 2));
 				}
 				bandAmps[i] /= (bandBins[i+1] - bandBins[i]);
 			}
@@ -140,5 +140,5 @@ void xFFT(void* pvParameters)
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
     taskYIELD();        
-    fft_destroy(fft_config);
+    fft_free(fft_config);
 }
