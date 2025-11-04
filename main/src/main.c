@@ -1,4 +1,4 @@
-#include <matrix_wrapper.h>
+#include "matrix_wrapper.h"
 #include "LED_task.h"
 #include "Audio_task.h"
 #include "freertos/idf_additions.h"
@@ -27,15 +27,24 @@
     LATCH: GPIO 23
     OE: GPIO 27
     GND: GND
+
+	INTERRUPTS:
+	Color Change Button: GPIO 35
 */
 
 void app_main() {
+	//Creating RTOS Components for communicating between tasks
 	bufferQueue = xQueueCreate(1, sizeof(float*));
 	fftToLEDQueue = xQueueCreate(1, sizeof(float*));
 	LEDBufferMutex = xSemaphoreCreateMutex();
+	interputQueue = xQueueCreate(1, sizeof(int*));
 
+	//Handling Interrupts:
+	setInterruptGPIOs();
+	xTaskCreate(vColorChange, "ColorChangeISR", 2048, NULL, 5, NULL);
 
-    xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 4, NULL, 0);
-    xTaskCreatePinnedToCore(xFFT, "FFT", 8192, NULL, 4, NULL, 0);
-	xTaskCreatePinnedToCore(xDrawLEDLevels, "DrawLEDLevels", 8192, NULL, 5, NULL, 1);
+	//All other tasks
+    xTaskCreatePinnedToCore(sampleAudioData, "SamplingI2S", 8192, NULL, 3, NULL, 0);
+    xTaskCreatePinnedToCore(xFFT, "FFT", 8192, NULL, 3, NULL, 0);
+	xTaskCreatePinnedToCore(xDrawLEDLevels, "DrawLEDLevels", 8192, NULL, 4, NULL, 1);
 }
