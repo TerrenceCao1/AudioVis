@@ -31,7 +31,6 @@ void xDrawLEDLevels(void *pvParameter)
 //Button Interrupt to change colors
 QueueHandle_t interputQueue;
 
-
 static uint32_t lastInterruptTime = 0;
 static void IRAM_ATTR gpio_interrupt_handler(void *args)
 {

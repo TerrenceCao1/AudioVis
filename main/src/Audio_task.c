@@ -77,6 +77,7 @@ void sampleAudioData(void * pvParameter)
 		{
 			int32_t s24 = samplingBuffer[i] >> 8;
 			fftBuffer[i] = (float)s24 * 100/ 8388608.0f; //2^32 to normalize the float
+			fftBuffer[i] *= 0.5 * (1 - cosf(2 * PI * i / (BUFFER_SIZE - 1))); //adding Hann window
 		}
 		
 		if(xQueueSend(bufferQueue, &fftBuffer, portMAX_DELAY)){}
@@ -88,6 +89,8 @@ void sampleAudioData(void * pvParameter)
 #define FFT_BANDS 32
 #define MIN_BAND_VALUE 2
 #define MAX_BAND_VALUE 32
+
+#define NOISE_THRESHOLD 0.6
 
 SemaphoreHandle_t LEDBufferMutex;
 float LED_Buffer[FFT_BANDS];
@@ -127,6 +130,7 @@ void xFFT(void* pvParameters)
 					bandAmps[i] += sqrtf(pow(fft_config->realInput[j], 2) + pow(fft_config->imagInput[j], 2));
 				}
 				bandAmps[i] /= (bandBins[i+1] - bandBins[i]);
+				if(bandAmps[i] < NOISE_THRESHOLD) bandAmps[i] = 0;
 			}
 
 			if(xSemaphoreTake(LEDBufferMutex, portMAX_DELAY))
