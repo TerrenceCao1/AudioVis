@@ -8,7 +8,7 @@
 #include "portmacro.h"
 
 // TODO: Color changing Button!
-int buttonPressCount = 0;
+int colorIndex = 0;
 static const uint16_t colors[] = {0xFFFF, 0xF000, 0x3EBF, 0xEC9D, 0x07E4, 0x20FE};
 #define COLOR_COUNT (sizeof(colors) / sizeof(colors[0]))
 
@@ -20,7 +20,7 @@ void xDrawLEDLevels(void *pvParameter)
 		if(xSemaphoreTake(LEDBufferMutex, portMAX_DELAY))
 		{
 			matrix_clear();
-			matrix_draw_audio_levels(LED_Buffer, colors[buttonPressCount % COLOR_COUNT]);
+			matrix_draw_audio_levels(LED_Buffer, colors[colorIndex]);
 
 			xSemaphoreGive(LEDBufferMutex);
 		}
@@ -67,7 +67,7 @@ void vColorChange(void* params)
 			vTaskDelay(pdMS_TO_TICKS(50));
 			if(gpio_get_level(BUTTON_PIN))
 			{
-				buttonPressCount++;			
+				colorIndex = (colorIndex + 1) % COLOR_COUNT;			
 			}
 		}
 	}
