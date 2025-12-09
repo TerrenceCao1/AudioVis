@@ -3,6 +3,8 @@
 #include "driver/gpio.h"
 #include "esp_err.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/projdefs.h"
 
 #define I2S_PORT  I2S_NUM_0
 
@@ -53,7 +55,6 @@ int app_main(void)
 	i2s_init();
 	int32_t buffer[128];
 	size_t bytes_read = 0;
-	int64_t sum = 0;
 
 	while(1)
 	{
@@ -61,11 +62,12 @@ int app_main(void)
 
 		for(int i = 0; i < 128; i++)
 		{
-			int32_t out = buffer[i] >> 8;
-			sum += (out > 0) ? out : -out;
+			float out = (buffer[i] >> 8) * 100/8388608.0f;
+			printf("%i, %f\n", i, out);
+			//printf("%f ", out);
 		}
-		printf("sum: %lld\n", sum);
-		sum = 0;
+		printf("\n\n");
+		vTaskDelay(pdMS_TO_TICKS(10));
 	}
 
 	return 0;

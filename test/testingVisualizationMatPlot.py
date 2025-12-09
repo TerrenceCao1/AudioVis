@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-ser = serial.Serial('COM4', 115200, timeout = 1)
+ser = serial.Serial('/dev/ttyUSB0', 115200, timeout = 1)
 
 
 num_bins = 32
@@ -12,7 +12,7 @@ bin_vals = np.zeros(num_bins, dtype=np.int64)
 
 fig, ax = plt.subplots()
 bars = ax.bar(np.arange(num_bins), bin_vals)
-ax.set_ylim(0, 250)
+ax.set_ylim(0, 100)
 ax.set_xlabel("Bin")
 ax.set_ylabel("Value")
 ax.set_title("Frequency Bins")
